@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+src/dansk_pensionsanalyse/__init__.py
+src/dansk_pensionsanalyse/models.py
+src/dansk_pensionsanalyse/privacy.py
+src/dansk_pensionsanalyse.egg-info/PKG-INFO
+src/dansk_pensionsanalyse.egg-info/SOURCES.txt
+src/dansk_pensionsanalyse.egg-info/dependency_links.txt
+src/dansk_pensionsanalyse.egg-info/requires.txt
+src/dansk_pensionsanalyse.egg-info/top_level.txt
+tests/test_privacy.py
