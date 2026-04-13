@@ -1,48 +1,58 @@
-# Plan: Dansk pensionsanalytiker v0.1
+# Plan: Dansk pensionsanalytiker v0.2
 
 ## Architecture overview
 
-Løsningen opdeles i fem lag:
+Løsningen opdeles i seks lag:
 
 1. Dokumentindtag og parsing
-2. Normalisering og domænemodel
-3. Privacy- og redaktionslag
-4. Analyse- og scenariemotor
-5. Brugergrænseflade og audit
+2. Ekstraktionsobservation og kvalitetssignaler
+3. Normalisering og domænemodel
+4. Privacy- og redaktionslag
+5. Analyse- og scenariemotor
+6. Brugergrænseflade og audit
 
 ## Proposed components
 
 ### 1. Document ingestion
 - Upload eller lokal filindlæsning af PDF
-- Tekstudtræk via PDF-parser
-- Mulig senere OCR for scannede dokumenter
+- Tekstudtræk via primær parser
+- Mulighed for alternative ekstraktionsstrategier senere
 
-### 2. Domain model
+### 2. Extraction observability
+- Sidevis statistik over udtrukket tekst
+- Markering af sider med tomt eller mistænkeligt lavt output
+- Samlet vurdering af ekstraktionskvalitet pr. dokument
+
+### 3. Domain model
 - PensionPlan
 - InsuranceCoverage
 - TaxProfile
 - ScenarioInput
 - ScenarioResult
+- ExtractionReport
 
-### 3. Privacy bridge
+### 4. Privacy bridge
 - Identifikation af direkte identifikatorer
 - Maskering/redaktion før LLM-kald
 - Auditlog af saniteret input/output
 
-### 4. Analysis engine
+### 5. Analysis engine
 - Regelbaseret klassifikation af ordninger
 - Simpel scenarieudregning for indbetaling, alder og udbetalingsform
 - Forklaringsgenerator for antagelser og usikkerheder
+- Respekt for ekstraktionskvalitet i svar og forklaringer
 
-### 5. User interface
+### 6. User interface
 - Første version som CLI eller simpel lokal webapp
 - Dansk spørgsmål/svar
 - Visning af dokumentudtræk, klassifikation og scenarier
+- Visning af ekstraktionsrapport og advarsler
 
 ## Suggested stack
 
 - Python
-- pdfplumber eller pypdf til tekstudtræk
+- pypdf som første parser
+- Mulighed for senere fallback-parser
 - Pydantic til datamodeller
 - FastAPI eller Streamlit til første UI
 - Pytest til tests
@@ -57,11 +67,12 @@ Løsningen opdeles i fem lag:
 ### M2 Document extraction
 - Indlæs PDF
 - Udtræk tekst og relevante sektioner
-- Gem struktureret mellemresultat lokalt i hukommelsen
+- Registrér sidevis output og kvalitetssignaler
 
 ### M3 Domain classification
 - Map dokumentudtræk til ordningstyper og forsikringer
 - Etabler fælles intern model
+- Tag højde for delvist eller usikkert input
 
 ### M4 Privacy and LLM interface
 - Implementer PII-maskering
@@ -71,11 +82,13 @@ Løsningen opdeles i fem lag:
 ### M5 Scenario engine
 - Opret basale scenarieberegninger
 - Forklar forskelle mellem scenarier
+- Begræns svar, hvis inputkvaliteten er lav
 
 ### M6 User-facing experience
 - Simpel lokal grænseflade
 - Spørgsmål/svar på dansk
 - Forklaringer og antagelser
+- Synlig ekstraktionsstatus
 
 ## Risks
 
@@ -83,6 +96,7 @@ Løsningen opdeles i fem lag:
 - Kompleksitet i danske skatte- og pensionsregler
 - Falsk sikkerhed hvis LLM-svar ikke er tydeligt afgrænset
 - Overmaskering eller undermaskering af PII
+- Tavse parserfejl, hvor nogle sider fejler uden tydelig fejlmeddelelse
 
 ## Technical principles
 
@@ -90,3 +104,4 @@ Løsningen opdeles i fem lag:
 - LLM bruges til forklaring og struktureret ekstraktion, ikke som eneste sandhedskilde
 - PII må ikke forlade systemet umaskeret
 - Løsningen skal være modulær, så nye dokumenttyper kan tilføjes senere
+- Ekstraktionskvalitet skal være en første-klasses del af datamodellen, ikke bare debug-output

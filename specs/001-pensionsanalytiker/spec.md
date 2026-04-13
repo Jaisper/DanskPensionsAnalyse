@@ -1,4 +1,4 @@
-# Spec: Dansk pensionsanalytiker v0.1
+# Spec: Dansk pensionsanalytiker v0.2
 
 ## Problem statement
 
@@ -10,6 +10,8 @@ Brugeren skal kunne forstå:
 - hvilke forsikringer der er knyttet til ordningerne,
 - hvordan forskellige ordninger beskattes,
 - hvordan ændringer i opsparing eller udbetaling påvirker pensionen.
+
+Samtidig skal systemet være ærligt om kvaliteten af dokumentudtrækket. Hvis dokumenter ikke kan læses fuldt ud eller kun delvist kan fortolkes, skal systemet rapportere dette tydeligt i stedet for at give et falsk indtryk af fuldstændighed.
 
 ## Users
 
@@ -23,7 +25,8 @@ Systemet skal kunne:
 - identificere pensionsordninger og tilknyttede forsikringer,
 - besvare spørgsmål på dansk om ordninger, skat, udbetaling og scenarier,
 - simulere simple scenarier for fortsat opsparing og udbetaling,
-- beskytte persondata ved at maskere PII før eksterne LLM-kald.
+- beskytte persondata ved at maskere PII før eksterne LLM-kald,
+- rapportere hvor sikkert eller usikkert dokumentudtrækket er.
 
 ## Non-goals
 
@@ -31,7 +34,8 @@ Systemet skal ikke:
 
 - agere juridisk eller finansiel rådgiver,
 - udføre handler eller ændre pensionsordninger,
-- dække generel privatøkonomisk rådgivning uden for pension og tilknyttede forsikringer.
+- dække generel privatøkonomisk rådgivning uden for pension og tilknyttede forsikringer,
+- foregive at have læst hele dokumentet, hvis udtrækket kun er delvist.
 
 ## Inputs
 
@@ -63,6 +67,12 @@ Systemet skal maskere eller fjerne direkte identifikatorer før data sendes til 
 ### FR7 Audit
 Systemet skal kunne logge den maskerede payload, der sendes til en LLM, samt modelsvaret, så audit og debugging er muligt uden at lagre rå PII.
 
+### FR8 Ekstraktionskvalitet
+Systemet skal kunne angive, om dokumentudtrækket virker komplet, delvist eller usikkert, og det skal kunne rapportere dette mindst på dokumentniveau og helst på sideniveau.
+
+### FR9 Observability
+Systemet skal kunne give udvikleren indsigt i, hvilke sider eller sektioner der gav tekst, ingen tekst eller uventet lav tekstmængde.
+
 ## Privacy requirements
 
 - Rå PII må gerne vises i den lokale session.
@@ -70,8 +80,15 @@ Systemet skal kunne logge den maskerede payload, der sendes til en LLM, samt mod
 - Logger må kun indeholde maskerede eller anonymiserede data.
 - Persistens af rå persondata skal som udgangspunkt undgås.
 
+## Quality constraints
+
+- Systemet skal foretrække ærlighed om usikkerhed frem for overdreven selvsikkerhed.
+- Dokumentudtræk skal kunne udvides med flere strategier uden at ændre resten af systemets arkitektur.
+- Fejl i ekstraktion skal være synlige for udvikleren og forklarlige for brugeren.
+
 ## Success criteria
 
 - Brugeren kan få et samlet og forståeligt overblik over sine pensionsordninger.
 - Brugeren kan stille mindst 10 forskellige typer spørgsmål om pension, forsikring og scenarier og få konsistente svar.
 - Systemet kan demonstrere, at umaskeret PII ikke sendes til en ekstern LLM.
+- Systemet kan markere, når et dokument kun er delvist udtrukket eller uklart fortolket.
